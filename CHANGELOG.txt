@@ -92,6 +92,7 @@ v21.0.00
         School Admin: added Manage Medical Conditions action
         School Admin: added optional introductory text setting for the Medical Conditions section
         School Admin: added color picker to Manage Alert Levels page
+        School Admin: updated library background colour selection to use colour picker
         Staff: removed the display of addresses in the Staff Profile
         Staff: restricted access to Emergency Contacts to users with Manage Staff_confidential
         Staff: added first aid information to Personal sub-page of staff profile
@@ -105,6 +106,7 @@ v21.0.00
         Students: added notifications for High and Medium medical conditions
         Students: added notifications for accepted applications with SEN/Medical needs
         Students: application forms accepted to upcoming years will set students to Expected
+        Students: added Official Name to Left Students and New Students reports
         School Admin: added optional descriptions for medical conditions
         System Admin: adjusted View Log to show only current year's log entries
         System Admin: added a flag to import types to enable updating non-unique rows
