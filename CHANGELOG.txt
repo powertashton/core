@@ -40,6 +40,9 @@ v21.0.00
         Staff: removed roles-as-type in Manage Staff, reducing option to Teaching and Support and setting all non-Teaching users to Support
         System Admin: displaying a cookie consent message to users is enabled by default
 
+    Security
+        Updated TinyMCE Editor to version 5.6.2
+
     Tweaks & Additions
         System: added Romanian Leu as currency option
         System: update complete homework to display in green on the Parent Dashboard
@@ -54,6 +57,7 @@ v21.0.00
         System: added a server-side hard limit for session durations
         System: adjusted robots meta tag to dissuade Google from indexing Gibbon installs
         Attendance: added an Offsite - Late option for attendance codes
+        Crowd Assessment: changed error to message in conversation view
         Departments: improved course/class naming in Class view
         Data Updater: data updates with no changes will be automatically accepted
         Data Updater: enabled address fields to be read only or hidden in Data Updater Settings
@@ -84,6 +88,8 @@ v21.0.00
         Planner: any staff can take attendance in the planner if they have Attendance by Class permission
         Planner: added a setting to customize what homework is called in the planner
         Planner: added the ability to set a time cap for homework
+        Planner: fixed empty My Class drop down in Deadlines for parents
+        Planner: changed error to message in chat view
         Reports: display the download link after a batch PDF has completed
         Reports: added full course name to the report writing page
         Reports: added a bulk delete action in the Edit Reporting Scopes page
@@ -123,11 +129,12 @@ v21.0.00
         System: fixed date picker not using the First Day of the Week setting
         System: fixed validation not working for paginated bulk action forms
         System: added a fallback to translateN for systems that don't have gettext
-        System Admin: fixed PHP deprecation errors in CSV importer
+        System: fixed wrapping of long summaries in Today's Lessons
         Attendance: fixed sortable Class column in Student Not In Class report
         Data Updater: fixed passport expiry fields not properly hiding
         Departments: fixed attendance link not prefilling the current date
         Finance: fixed invoicee ordering bug in Add Invoice
+        Finance: fixed table width in invoice email formatting
         Formal Assessment: removed Back link from delete modal
         Individual Needs: fixed description of Reason field in Manage Investigations
         Library: fixed broken delete function in Manage Catalog
@@ -147,6 +154,8 @@ v21.0.00
         Students: fixed students able to see other students in class lists
         Students: fixed issue preventing timetable edit link from working with left students and allStudent flag
         Students: fixed missing alert bar in Markbook and Internal Assessment sub-pages in student profile
+        System Admin: fixed PHP deprecation errors in CSV importer
+        System Admin: fixed empty numeric values importing as 0 rather than null
         Timetable: fixed View Available Facilities not counting bookings on Friday
 	    Tests: added fallback environment variables if .env is not defining DB details
 	    Tests: changed HTTP to HTTPs, so SSL enabled environments don't fail
