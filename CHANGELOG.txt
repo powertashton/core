@@ -16,6 +16,36 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 CHANGELOG
 =========
+v22.0.00
+--------
+    Headlines
+    Significant Changes
+    Changes With Important Notices
+    Tweaks & Additions
+        System: added the Getting Started info to the post-install page
+        System: added an Update All option to the Manage Languages page
+        System: updated text to use darker colours for printable report pages
+        Finance: removed student DOB and Gender from Export Invoices
+        Reports: clear report cache when editing template assets in Production
+        System Admin: added option to manually invalidate front end cache for Cutting Edge installs
+        Tests: migrated test suite to GitHub actions, updated testing libraries to recent versions
+        
+    Bug Fixes
+        
+v21.0.01
+--------
+    Tweaks & Additions
+        System Admin: added post_max_size and upload_max_filesize PHP settings to System Check
+        System Admin: updated Manage Languages to use i18n main branch instead of master
+    
+    Bug Fixes
+        System: fixed import error for non-nullable numeric values
+        Attendance: fixed missing attendance in Not Present and Not Onside reports
+        Attendance: fixed non-prefillable class attendance overwriting First Class as School Attendance logs
+        Planner: fixed smart block summary from replacing existing summary text in Edit Lesson
+        Staff: fixed weekdays incorrect on Sundays in Weekly Absences report
+        System Admin: fixed clear cache button in Cache Manager not using custom cache path
+
 v21.0.00
 --------
     Headlines
