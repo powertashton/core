@@ -191,7 +191,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Activities/activities_mana
 
             //Block template
             $sqlWeekdays = "SELECT gibbonDaysOfWeekID as value, name FROM gibbonDaysOfWeek ORDER BY sequenceNumber";
-            $sqlSpaces = "SELECT CAST(gibbonSpaceID AS INT) as value, name FROM gibbonSpace ORDER BY name"; //Must cast to int for select to work
 
             $slotBlock = $form->getFactory()->createTable()->setClass('blank');
                 $row = $slotBlock->addRow();
@@ -205,7 +204,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Activities/activities_mana
                     $row->addLabel('timeStart', __('Slot Start Time'));
                     $row->addTime('timeStart');
                 
-                $row = $slotBlock->addRow();
                     $row->addLabel('timeEnd', __('Slot End Time'));
                     $row->addTime('timeEnd')
                         ->chainedTo('timeStart');
@@ -221,8 +219,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Activities/activities_mana
                         ]);
 
                 $row = $slotBlock->addRow()->addClass('hideShow');
-                    $row->addSelect('gibbonSpaceID')
-                        ->fromQuery($pdo, $sqlSpaces)
+                    $row->addSelectSpace('gibbonSpaceID')
                         ->placeholder()
                         ->addClass('sm:max-w-full w-full');
 
@@ -251,17 +248,11 @@ if (isActionAccessible($guid, $connection2, '/modules/Activities/activities_mana
 
             foreach ($timeSlots as $slot) {
                 //Must cast to int for select to work.
-                $slot['gibbonSpaceID'] = intval($slot['gibbonSpaceID']);                
                 $slot['location'] = empty($slot['gibbonSpaceID']) ? 'External' : 'Internal';
                 $slotBlocks->addBlock($slot['gibbonActivitySlotID'], $slot);
             }
 
             $form->addRow()->addHeading(__('Current Staff'));
-
-            $data = array('gibbonActivityID' => $gibbonActivityID);
-            $sql = "SELECT preferredName, surname, gibbonActivityStaff.* FROM gibbonActivityStaff JOIN gibbonPerson ON (gibbonActivityStaff.gibbonPersonID=gibbonPerson.gibbonPersonID) WHERE gibbonActivityID=:gibbonActivityID AND gibbonPerson.status='Full' ORDER BY surname, preferredName";
-
-            $results = $pdo->executeQuery($data, $sql);
 
             $form->addRow()->addContent('<b>'.__('Warning').'</b>: '.__('If you delete a member of staff, any unsaved changes to this record will be lost!'))->wrap('<i>', '</i>');
 
@@ -347,7 +338,13 @@ if (isActionAccessible($guid, $connection2, '/modules/Activities/activities_mana
                     //This is to ensure that loaded blocks have timepickers
                     $(time).each(function() {
                         setTimepicker($(this));
-                    })
+                    });
+
+                    //This is needed to ensure that loaded timeEnds are properly chained to loaded timeStarts
+                    $('input[id^=timeEnd]').each(function() {
+                        var timeStart = $('#' + $(this).prop('id').replace('End', 'Start'));
+                        $(this).timepicker('option', {'minTime': timeStart.val(), 'timeFormat': 'H:i', 'showDuration': true});
+                    });
                 });
 
                 //This supplements triggers for the Internal and External Locations

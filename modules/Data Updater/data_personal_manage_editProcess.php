@@ -20,6 +20,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 use Gibbon\Services\Format;
 use Gibbon\Comms\NotificationEvent;
 use Gibbon\Comms\NotificationSender;
+use Gibbon\Forms\CustomFieldHandler;
+use Gibbon\Domain\System\LogGateway;
 use Gibbon\Domain\System\NotificationGateway;
 
 include '../../gibbon.php';
@@ -27,6 +29,7 @@ include '../../gibbon.php';
 //Module includes
 include '../User Admin/moduleFunctions.php';
 
+$logGateway = $container->get(LogGateway::class);
 $gibbonPersonUpdateID = $_GET['gibbonPersonUpdateID'] ?? '';
 $gibbonPersonID = $_POST['gibbonPersonID'] ?? '';
 $URL = $_SESSION[$guid]['absoluteURL'].'/index.php?q=/modules/'.getModuleName($_POST['address'])."/data_personal_manage_edit.php&gibbonPersonUpdateID=$gibbonPersonUpdateID";
@@ -431,25 +434,9 @@ if (isActionAccessible($guid, $connection2, '/modules/Data Updater/data_personal
                     }
                 }
 
-                //DEAL WITH CUSTOM FIELDS
-                //Prepare field values
-                $resultFields = getCustomFields($connection2, $guid, $student, $staff, $parent, $other, null, true);
-                $fields = isset($row2['fields']) ? json_decode($row2['fields'], true) : [];
-                if ($resultFields->rowCount() > 0) {
-                    while ($rowFields = $resultFields->fetch()) {
-                        if (isset($_POST['newcustom'.$rowFields['gibbonCustomFieldID'].'On'])) {
-                            if (isset($_POST['newcustom'.$rowFields['gibbonCustomFieldID']])) {
-                                if ($rowFields['type'] == 'date') {
-                                    $fields[$rowFields['gibbonCustomFieldID']] = dateConvert($guid, $_POST['newcustom'.$rowFields['gibbonCustomFieldID']]);
-                                } else {
-                                    $fields[$rowFields['gibbonCustomFieldID']] = $_POST['newcustom'.$rowFields['gibbonCustomFieldID']];
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $fields = json_encode($fields);
+                // CUSTOM FIELDS
+                $params = compact('student', 'staff', 'parent', 'other');
+                $fields = $container->get(CustomFieldHandler::class)->getFieldDataFromDataUpdate('Person', $params, $row2['fields']);
 
                 if (strlen($set) > 1) {
                     //Write to database
@@ -542,7 +529,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Data Updater/data_personal
                             $privacyValues['gibbonPersonIDRequestor'] = $row['gibbonPersonIDUpdater'] ;
                             $privacyValues['gibbonPersonIDAcceptor'] = $_SESSION[$guid]["gibbonPersonID"] ;
 
-                            setLog($connection2, $_SESSION[$guid]["gibbonSchoolYearID"], $gibbonModuleID, $_SESSION[$guid]["gibbonPersonID"], 'Privacy - Value Changed via Data Updater', $privacyValues, $_SERVER['REMOTE_ADDR']) ;
+                            $logGateway->addLog($_SESSION[$guid]["gibbonSchoolYearID"], $gibbonModuleID, $_SESSION[$guid]["gibbonPersonID"], 'Privacy - Value Changed via Data Updater', $privacyValues, $_SERVER['REMOTE_ADDR']) ;
 
                         }
                     }

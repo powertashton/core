@@ -30,6 +30,7 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
     //Proceed!
     $enablePublicRegistration = getSettingByScope($connection2, 'User Admin', 'enablePublicRegistration');
     $customFieldGateway = $container->get(CustomFieldGateway::class);
+
     
     $data = [
         'context'                  => $_POST['context'] ?? 'Person',
@@ -38,11 +39,17 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
         'description'              => $_POST['description'] ?? '',
         'type'                     => $_POST['type'] ?? '',
         'options'                  => $_POST['options'] ?? '',
-        'required'                 => $_POST['required'] ?? '',
+        'required'                 => $_POST['required'] ?? 'N',
+        'hidden'                   => $_POST['hidden'] ?? 'N',
+        'heading'                  => $_POST['heading'] ?? '',
         'activeDataUpdater'        => $_POST['activeDataUpdater'] ?? '0',
         'activeApplicationForm'    => $_POST['activeApplicationForm'] ?? '0',
         'activePublicRegistration' => $enablePublicRegistration == 'Y' ? ($_POST['activePublicRegistration'] ?? '0') : '0',
     ];
+
+    // Add this field to the bottom of the current sequenceNumber for this context
+    $sequenceCheck = $customFieldGateway->selectBy(['context' => $data['context']], ['sequenceNumber'])->fetch();
+    $data['sequenceNumber'] = $sequenceCheck['sequenceNumber'] + 1;
 
     if ($data['type'] == 'varchar') $data['options'] = min(max(0, intval($data['options'])), 255);
     if ($data['type'] == 'text') $data['options'] = max(0, intval($data['options']));

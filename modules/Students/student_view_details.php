@@ -29,6 +29,7 @@ use Gibbon\Domain\Students\StudentGateway;
 use Gibbon\Domain\Planner\PlannerEntryGateway;
 use Gibbon\Domain\Students\StudentNoteGateway;
 use Gibbon\Domain\Library\LibraryReportGateway;
+use Gibbon\Forms\CustomFieldHandler;
 use Gibbon\Module\Planner\Tables\HomeworkTable;
 use Gibbon\Module\Attendance\StudentHistoryData;
 use Gibbon\Module\Attendance\StudentHistoryView;
@@ -170,87 +171,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Students/student_view_deta
                     echo '</tr>';
                     echo '</table>';
 
-                    $extendedBriefProfile = getSettingByScope($connection2, 'Students', 'extendedBriefProfile');
-                    if ($extendedBriefProfile == 'Y') {
-                        echo '<h3>';
-                        echo __('Family Details');
-                        echo '</h3>';
-
-                        $dataFamily = array('gibbonPersonID' => $gibbonPersonID);
-                        $sqlFamily = 'SELECT * FROM gibbonFamily JOIN gibbonFamilyChild ON (gibbonFamily.gibbonFamilyID=gibbonFamilyChild.gibbonFamilyID) WHERE gibbonPersonID=:gibbonPersonID';
-                        $resultFamily = $connection2->prepare($sqlFamily);
-                        $resultFamily->execute($dataFamily);
-
-                        if ($resultFamily->rowCount() < 1) {
-                            echo "<div class='error'>";
-                            echo __('There are no records to display.');
-                            echo '</div>';
-                        } else {
-                            while ($rowFamily = $resultFamily->fetch()) {
-                                $count = 1;
-
-                                //Get adults
-                                $dataMember = array('gibbonFamilyID' => $rowFamily['gibbonFamilyID']);
-                                $sqlMember = 'SELECT * FROM gibbonFamilyAdult JOIN gibbonPerson ON (gibbonFamilyAdult.gibbonPersonID=gibbonPerson.gibbonPersonID) WHERE gibbonFamilyID=:gibbonFamilyID AND gibbonPerson.status=\'Full\' ORDER BY contactPriority, surname, preferredName';
-                                $resultMember = $connection2->prepare($sqlMember);
-                                $resultMember->execute($dataMember);
-
-                                while ($rowMember = $resultMember->fetch()) {
-                                    echo '<h4>';
-                                    echo __('Adult').' '.$count;
-                                    echo '</h4>';
-                                    echo "<table class='smallIntBorder' cellspacing='0' style='width: 100%'>";
-                                    echo '<tr>';
-                                    echo "<td style='width: 33%; vertical-align: top'>";
-                                    echo "<span style='font-size: 115%; font-weight: bold'>".__('Name').'</span><br/>';
-                                    echo Format::name($rowMember['title'], $rowMember['preferredName'], $rowMember['surname'], 'Parent');
-                                    echo '</td>';
-                                    echo "<td style='width: 33%; vertical-align: top'>";
-                                    echo "<span style='font-size: 115%; font-weight: bold'>".__('First Language').'</span><br/>';
-                                    echo $rowMember['languageFirst'];
-                                    echo '</td>';
-                                    echo "<td style='width: 34%; vertical-align: top' colspan=2>";
-                                    echo "<span style='font-size: 115%; font-weight: bold'>".__('Second Language').'</span><br/>';
-                                    echo $rowMember['languageSecond'];
-                                    echo '</td>';
-                                    echo '</tr>';
-                                    echo '<tr>';
-                                    echo "<td style='width: 33%; padding-top: 15px; width: 33%; vertical-align: top'>";
-                                    echo "<span style='font-size: 115%; font-weight: bold'>".__('Contact By Phone').'</span><br/>';
-                                    if ($rowMember['contactCall'] == 'N') {
-                                        echo __('Do not contact by phone.');
-                                    } elseif ($rowMember['contactCall'] == 'Y' and ($rowMember['phone1'] != '' or $rowMember['phone2'] != '' or $rowMember['phone3'] != '' or $rowMember['phone4'] != '')) {
-                                        for ($i = 1; $i < 5; ++$i) {
-                                            if ($rowMember['phone'.$i] != '') {
-                                                if ($rowMember['phone'.$i.'Type'] != '') {
-                                                    echo $rowMember['phone'.$i.'Type'].':</i> ';
-                                                }
-                                                if ($rowMember['phone'.$i.'CountryCode'] != '') {
-                                                    echo '+'.$rowMember['phone'.$i.'CountryCode'].' ';
-                                                }
-                                                echo formatPhone($rowMember['phone'.$i]).'<br/>';
-                                            }
-                                        }
-                                    }
-                                    echo '</td>';
-                                    echo "<td style='width: 33%; padding-top: 15px; width: 34%; vertical-align: top' colspan=2>";
-                                    echo "<span style='font-size: 115%; font-weight: bold'>".__('Contact By Email').'</span><br/>';
-                                    if ($rowMember['contactEmail'] == 'N') {
-                                        echo __('Do not contact by email.');
-                                    } elseif ($rowMember['contactEmail'] == 'Y' and ($rowMember['email'] != '' or $rowMember['emailAlternate'] != '')) {
-                                        if ($rowMember['email'] != '') {
-                                            echo "<a href='mailto:".$rowMember['email']."'>".$rowMember['email'].'</a><br/>';
-                                        }
-                                        echo '<br/>';
-                                    }
-                                    echo '</td>';
-                                    echo '</tr>';
-                                    echo '</table>';
-                                    ++$count;
-                                }
-                            }
-                        }
-                    }
                     //Set sidebar
                     $_SESSION[$guid]['sidebarExtra'] = getUserPhoto($guid, $row['image_240'], 240);
                 }
@@ -1157,50 +1077,11 @@ if (isActionAccessible($guid, $connection2, '/modules/Students/student_view_deta
                         }
                         echo '</table>';
 
-                        //Custom Fields
-                        $fields = json_decode($row['fields'], true);
-                        $resultFields = getCustomFields($connection2, $guid, true);
-                        if ($resultFields->rowCount() > 0) {
-                            echo '<h4>';
-                            echo __('Custom Fields');
-                            echo '</h4>';
+                        // Custom Fields
+                        $table = $container->get(CustomFieldHandler::class)->createCustomFieldsTable('Person', ['student' => 1], $row['fields']);
+                        $table->setTitle(__('Custom Fields'));
+                        echo $table->getOutput();
 
-                            echo "<table class='smallIntBorder' cellspacing='0' style='width: 100%'>";
-                            $count = 0;
-                            $columns = 3;
-
-                            while ($rowFields = $resultFields->fetch()) {
-                                if ($count % $columns == 0) {
-                                    echo '<tr>';
-                                }
-                                echo "<td style='width: 33%; padding-top: 15px; vertical-align: top'>";
-                                echo "<span style='font-size: 115%; font-weight: bold'>".__($rowFields['name']).'</span><br/>';
-                                if (isset($fields[$rowFields['gibbonCustomFieldID']])) {
-                                    if ($rowFields['type'] == 'date') {
-                                        echo dateConvertBack($guid, $fields[$rowFields['gibbonCustomFieldID']]);
-                                    } elseif ($rowFields['type'] == 'url') {
-                                        echo "<a target='_blank' href='".$fields[$rowFields['gibbonCustomFieldID']]."'>".$fields[$rowFields['gibbonCustomFieldID']].'</a>';
-                                    } else {
-                                        echo $fields[$rowFields['gibbonCustomFieldID']];
-                                    }
-                                }
-                                echo '</td>';
-
-                                if ($count % $columns == ($columns - 1)) {
-                                    echo '</tr>';
-                                }
-                                ++$count;
-                            }
-
-                            if ($count % $columns != 0) {
-                                for ($i = 0; $i < $columns - ($count % $columns); ++$i) {
-                                    echo "<td style='width: 33%; padding-top: 15px; vertical-align: top'></td>";
-                                }
-                                echo '</tr>';
-                            }
-
-                            echo '</table>';
-                        }
                     } elseif ($subpage == 'Family') {
 
                             $dataFamily = array('gibbonPersonID' => $gibbonPersonID);
@@ -1642,11 +1523,10 @@ if (isActionAccessible($guid, $connection2, '/modules/Students/student_view_deta
                                     : Format::small(__('Unknown'));
                             });
 
-                        $table->addColumn('tetanusWithin10Years', __('Tetanus Last 10 Years?'))
-                            ->format(Format::using('yesno', 'longTermMedication'));
+                        $table = $container->get(CustomFieldHandler::class)->createCustomFieldsTable('Medical Form', [], $medical['fields'], $table);
 
-                        $table->addColumn('bloodType', __('Blood Type'));
                         $table->addColumn('medicalConditions', __('Medical Conditions?'))
+                            ->addClass('col-span-3')
                             ->format(function ($medical) use ($conditions) {
                                 return count($conditions) > 0
                                     ? __('Yes').'. '.__('Details below.')
@@ -1657,7 +1537,8 @@ if (isActionAccessible($guid, $connection2, '/modules/Students/student_view_deta
                             $table->addColumn('comment', __('Comment'))->addClass('col-span-3');
                         }
 
-                        echo $table->render(!empty($medical) ? [$medical] : []);
+                        $fields = is_string($medical['fields']) ? json_decode($medical['fields'], true) : [];
+                        echo $table->render(!empty($medical) ? [$medical + $fields] : []);
 
                         // MEDICAL CONDITIONS
                         $canManageMedical = isActionAccessible($guid, $connection2, '/modules/Students/medicalForm_manage.php');
@@ -2285,7 +2166,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Students/student_view_deta
                                                     }
                                                 }
                                                 echo '</tr>';
-                                                if (mb_strlen($rowEntry['comment']) > 200) {
+                                                if ($rowEntry['commentOn'] == 'Y' && mb_strlen($rowEntry['comment']) > 200) {
                                                     echo "<tr class='comment-$entryCount' id='comment-$entryCount'>";
                                                     echo '<td colspan=6>';
                                                     echo nl2br($rowEntry['comment']);

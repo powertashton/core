@@ -783,4 +783,13 @@ UPDATE `gibbonAction` SET `category`='Customise', name='Notification Events' WHE
 UPDATE `gibbonAction` SET `category`='Customise' WHERE `name`='String Replacement' AND `gibbonModuleID`=(SELECT gibbonModuleID FROM gibbonModule WHERE name='System Admin');end
 UPDATE `gibbonAction` SET `category`='Customise' WHERE `name`='Email Templates' AND `gibbonModuleID`=(SELECT gibbonModuleID FROM gibbonModule WHERE name='System Admin');end
 ALTER TABLE `gibbonCustomField` ADD `context` VARCHAR(60) NOT NULL DEFAULT 'Person' AFTER `gibbonCustomFieldID`;end
+ALTER TABLE `gibbonCustomField` ADD `sequenceNumber` INT(4) NOT NULL AFTER `required`;end
+ALTER TABLE `gibbonCustomField` ADD `heading` VARCHAR(90) NOT NULL AFTER `required`;end
+ALTER TABLE `gibbonCustomField` CHANGE `type` `type` ENUM('varchar','text','date','time','url','select','checkboxes','radio','yesno','editor','color','number','image','file') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;end
+INSERT INTO gibbonLanguage (name) SELECT * FROM (SELECT 'Somali') AS tmp WHERE NOT EXISTS (SELECT name FROM gibbonLanguage WHERE (name='Somali')) LIMIT 1;end
+ALTER TABLE `gibbonPersonMedical` ADD `fields` TEXT NULL AFTER `comment`;end
+ALTER TABLE `gibbonPersonMedicalUpdate` ADD `fields` TEXT NULL AFTER `timestamp`;end
+DELETE FROM `gibbonSetting` WHERE scope='Students' AND name='extendedBriefProfile';end
+ALTER TABLE `gibbonActivitySlot` CHANGE `gibbonSpaceID` `gibbonSpaceID` int(10) UNSIGNED ZEROFILL DEFAULT NULL;end
+ALTER TABLE `gibbonCustomField` ADD `hidden` ENUM('Y','N') NULL DEFAULT 'N' AFTER `required`;end
 ";

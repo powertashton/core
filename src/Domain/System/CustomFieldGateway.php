@@ -19,13 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 namespace Gibbon\Domain\System;
 
-use Gibbon\Domain\Traits\TableAware;
 use Gibbon\Domain\QueryCriteria;
 use Gibbon\Domain\QueryableGateway;
+use Gibbon\Domain\Traits\TableAware;
 
 /**
- * @version v16
- * @since   v16
+ * @version v22
+ * @since   v22
  */
 class CustomFieldGateway extends QueryableGateway
 {
@@ -46,7 +46,7 @@ class CustomFieldGateway extends QueryableGateway
             ->newQuery()
             ->from($this->getTableName())
             ->cols([
-                'gibbonCustomFieldID', 'context', 'name', 'type', 'active', 'activePersonStudent', 'activePersonParent', 'activePersonStaff', 'activePersonOther'
+                'gibbonCustomFieldID', 'context', 'heading', 'name', 'type', 'active', 'activePersonStudent', 'activePersonParent', 'activePersonStaff', 'activePersonOther'
             ]);
         
         $criteria->addFilterRules([
@@ -73,5 +73,52 @@ class CustomFieldGateway extends QueryableGateway
         ]);
 
         return $this->runQuery($query, $criteria);
+    }
+
+    public function selectCustomFields($context, $params = [])
+    {
+        $query = $this
+            ->newSelect()
+            ->cols(['heading as groupBy', 'gibbonCustomField.*'])
+            ->from('gibbonCustomField')
+            ->where("active='Y'")
+            ->where('context=:context')
+            ->bindValue('context', $context);
+
+        if ($context == 'Person') {
+            // Handle role category flags as ORs
+            $query->where(function ($query) use (&$params) {
+                if ($params['student'] ?? false) {
+                    $query->orWhere('activePersonStudent=:student', ['student' => $params['student']]);
+                }
+                if ($params['staff'] ?? false) {
+                    $query->orWhere('activePersonStaff=:staff', ['staff' => $params['staff']]);
+                }
+                if ($params['parent'] ?? false) {
+                    $query->orWhere('activePersonParent=:parent', ['parent' => $params['parent']]);
+                }
+                if ($params['other'] ?? false) {
+                    $query->orWhere('activePersonOther=:other', ['other' => $params['other']]);
+                }
+            });
+        }
+
+        // Handle additional flags as ANDs
+        if ($params['applicationForm'] ?? false) {
+            $query->where('activeApplicationForm=:applicationForm', ['applicationForm' => $params['applicationForm']]);
+        }
+        if ($params['dataUpdater'] ?? false) {
+            $query->where('activeDataUpdater=:dataUpdater', ['dataUpdater' => $params['dataUpdater']]);
+        }
+        if ($params['publicRegistration'] ?? false) {
+            $query->where('activePublicRegistration=:publicRegistration', ['publicRegistration' => $params['publicRegistration']]);
+        }
+        if ($params['hideHidden'] ?? false) {
+            $query->where('hidden=:hidden', ['hidden' => 'N']);
+        }
+
+        $query->orderBy(['sequenceNumber', 'name']);
+
+        return $this->runSelect($query);
     }
 }
