@@ -773,7 +773,7 @@ $sql[$count][1] = "
 INSERT INTO `gibbonSetting` (`scope`, `name`, `nameDisplay`, `description`, `value`) VALUES ('System', 'cacheString', 'Front End Cache', '', '1611200873');end
 ALTER TABLE `gibbonDiscussion` ADD `gibbonPersonIDTarget` INT(10) UNSIGNED ZEROFILL NULL AFTER `gibbonPersonID`;end
 DELETE FROM `gibbonSetting` WHERE scope='Messenger' AND name IN ('messengerLastBubble','messageBubbleBGColor','messageBubbleWidthType','messageBubbleAutoHide');end
-INSERT INTO gibbonCountry VALUES ('South Sudan', '211');end
+INSERT INTO gibbonCountry (`printable_name`, `iddCountryCode`) VALUES ('South Sudan', '211');end
 INSERT INTO `gibbonSetting` (`scope`, `name`, `nameDisplay`, `description`, `value`) VALUES ('User Admin', 'publicRegistrationAllowedDomains', 'Public Registration Allowed Domains', 'Comma-separated list of email address domains allowed when registering. Leave blank for no restriction.', '');end
 ALTER TABLE `gibbonPerson` CHANGE `messengerLastBubble` `messengerLastRead` DATETIME NULL DEFAULT NULL;end
 RENAME TABLE `gibbonPersonField` TO `gibbonCustomField`;end
@@ -792,4 +792,7 @@ ALTER TABLE `gibbonPersonMedicalUpdate` ADD `fields` TEXT NULL AFTER `timestamp`
 DELETE FROM `gibbonSetting` WHERE scope='Students' AND name='extendedBriefProfile';end
 ALTER TABLE `gibbonActivitySlot` CHANGE `gibbonSpaceID` `gibbonSpaceID` int(10) UNSIGNED ZEROFILL DEFAULT NULL;end
 ALTER TABLE `gibbonCustomField` ADD `hidden` ENUM('Y','N') NULL DEFAULT 'N' AFTER `required`;end
+INSERT INTO `gibbonSetting` (`scope`, `name`, `nameDisplay`, `description`, `value`) VALUES ('System Admin', 'composerLockHash', 'Composer Update Required', '', '742368e59c40f1eb9b7d8f116f7af49d');end
+UPDATE `gibbonAction` SET categoryPermissionParent='N' WHERE `name`='View Markbook_myMarks' AND `gibbonModuleID`=(SELECT gibbonModuleID FROM gibbonModule WHERE name='Markbook');end
+DELETE `gibbonPermission` FROM `gibbonPermission` JOIN `gibbonAction` ON (gibbonAction.gibbonActionID=gibbonPermission.gibbonActionID) JOIN gibbonRole ON (gibbonRole.gibbonRoleID=gibbonPermission.gibbonRoleID) WHERE gibbonAction.name='View Markbook_myMarks' AND gibbonRole.category='Parent';end
 ";

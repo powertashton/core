@@ -96,16 +96,16 @@ class CustomFieldHandler
                 if ($field['type'] == 'image') {
                     $this->fileUploader->getFileExtensions('Graphics/Design');
                 }
-            
+
                 // Move attached file, if there is one
                 if (!empty($_FILES[$prefix.$field['gibbonCustomFieldID'].'File']['tmp_name'])) {
                     $file = $_FILES[$prefix.$field['gibbonCustomFieldID'].'File'] ?? null;
-            
+
                     // Upload the file, return the /uploads relative path
                     $fieldValue = $this->fileUploader->uploadFromPost($file, $field['name']);
                 }
             }
-            
+
             if (!is_null($fieldValue)) {
                 if ($field['type'] == 'date') {
                     $fieldValue = Format::dateConvert($fieldValue);
@@ -159,7 +159,7 @@ class CustomFieldHandler
                 } elseif (!empty($fieldValue) && $field['type'] == 'checkboxes') {
                     $fieldValue = explode(',', $fieldValue);
                 }
-                
+
                 $name = $prefix.$field['gibbonCustomFieldID'];
                 $row = $field['type'] == 'editor' ? $form->addRow()->addColumn() : $form->addRow();
                     $row->addLabel($name, $field['name'])->description($field['description']);
@@ -184,7 +184,7 @@ class CustomFieldHandler
         } else {
             $table = DataTable::createDetails('customFields')->withData([$existingFields]);
         }
-        
+
         foreach ($customFields as $field) {
             $col = $table->addColumn($field['gibbonCustomFieldID'], __($field['name']));
 
@@ -218,19 +218,26 @@ class CustomFieldHandler
         return $table;
     }
 
-    public function addCustomFieldsToDataUpdate(&$form, $context, $params = [], $oldValues, $newValues)
+    public function addCustomFieldsToDataUpdate(&$form, $context, array $params = [], $oldValues = '', $newValues = '')
     {
         $oldFields = !empty($oldValues['fields'])? json_decode($oldValues['fields'], true) : [];
         $newFields = !empty($newValues['fields'])? json_decode($newValues['fields'], true) : [];
 
+        foreach ($oldFields as $key => $value) {
+            $oldFields[str_pad($key, 4, "0", STR_PAD_LEFT)] = $value;
+        }
+        foreach ($newFields as $key => $value) {
+            $newFields[str_pad($key, 4, "0", STR_PAD_LEFT)] = $value;
+        }
+
         $customFields = $this->customFieldGateway->selectCustomFields($context, $params)->fetchAll();
 
         foreach ($customFields as $field) {
-            $fieldName = $field['gibbonCustomFieldID'];
+            $fieldID = str_pad($field['gibbonCustomFieldID'], 4, "0", STR_PAD_LEFT);
             $label = __($field['name']);
 
-            $oldValue = isset($oldFields[$fieldName])? $oldFields[$fieldName] : '';
-            $newValue = isset($newFields[$fieldName])? $newFields[$fieldName] : '';
+            $oldValue = $oldFields[$fieldID] ?? '';
+            $newValue = $newFields[$fieldID] ?? '';
 
             if ($field['type'] == 'date') {
                 $oldValue = Format::date($oldValue);
@@ -240,13 +247,13 @@ class CustomFieldHandler
             $isMatching = ($oldValue != $newValue);
 
             $row = $form->addRow();
-            $row->addLabel('new'.$fieldName.'On', $label);
+            $row->addLabel('new'.$fieldID.'On', $label);
             $row->addContent($oldValue);
             $row->addContent($newValue)->addClass($isMatching ? 'matchHighlightText' : '');
 
             if ($isMatching) {
-                $row->addCheckbox('newcustom'.$fieldName.'On')->checked(true)->setClass('textCenter');
-                $form->addHiddenValue('newcustom'.$fieldName, $newValue);
+                $row->addCheckbox('newcustom'.$fieldID.'On')->checked(true)->setClass('textCenter');
+                $form->addHiddenValue('newcustom'.$fieldID, $newValue);
             } else {
                 $row->addContent();
             }
