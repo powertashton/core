@@ -84,7 +84,7 @@ class Format
         if (empty($dateString)) {
             return '';
         }
-        $date = static::createDateTime($dateString);
+        $date = static::createDateTime($dateString, strlen($dateString) == 10 ? 'Y-m-d' : null);
         return $date ? $date->format($format ? $format : static::$settings['dateFormatPHP']) : $dateString;
     }
 
@@ -419,7 +419,7 @@ class Format
      *
      * @param string $url
      * @param string $text
-     * @param string $title
+     * @param array $attr
      * @return string
      */
     public static function link($url, $text = '', $attr = [])
@@ -434,6 +434,9 @@ class Format
             $attr = ['title' => $attr];
         }
 
+        if (stripos($url, '@') !== false) {
+            $url = 'mailto:'.$url;
+        }
         if (substr($url, 0, 2) == './') {
             $url = static::$settings['absoluteURL'].substr($url, 1);
         }
@@ -453,8 +456,8 @@ class Format
      */
     public static function hyperlinkAll(string $value)
     {
-        $pattern = "~[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]~";
-        return $output = preg_replace($pattern, '<a target="_blank" href="$0">$0</a>', $value);
+        $pattern = '/([^">]|^)(https?:\/\/[^"<>\s]+)/';
+        return preg_replace($pattern, '$1<a target="_blank" href="$2">$2</a>', $value);
     }
 
     /**
