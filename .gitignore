@@ -25,8 +25,19 @@ Thumb.db
 *~
 nbproject/
 
-# Vendor Libraries
-/vendor
+# Dev Dependencies
+/vendor/twbs
+
+# examples and tests in the vendor folder
+/vendor/**/tests
+/vendor/**/unitTests
+/vendor/**/Examples
+/vendor/**/examples
+/vendor/**/samples
+/vendor/**/docs
+
+# Generated TCPDF font files
+/vendor/tecnickcom/tcpdf/fonts
 
 # Var Folder
 var/*

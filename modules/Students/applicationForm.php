@@ -150,8 +150,6 @@ if ($proceed == false) {
 
     $siblingApplicationMode = !empty($gibbonApplicationFormID);
 
-    $customFieldHandler = $container->get(CustomFieldHandler::class);
-
     $form = Form::create('applicationForm', $_SESSION[$guid]['absoluteURL'].'/modules/'.$_SESSION[$guid]['module'].'/applicationFormProcess.php');
     $form->setAutocomplete('on');
     $form->setFactory(DatabaseFormFactory::create($pdo));
@@ -314,7 +312,7 @@ if ($proceed == false) {
 
         $applicationFormSENText = getSettingByScope($connection2, 'Students', 'applicationFormSENText');
         if (!empty($applicationFormSENText)) {
-            $heading->append($applicationFormSENText);
+            $heading->append('<p>'.$applicationFormSENText.'<p>');
         }
 
         $row = $form->addRow();
@@ -417,8 +415,8 @@ if ($proceed == false) {
     }
 
     // CUSTOM FIELDS FOR STUDENT
-    $params = ['student' => 1, 'applicationForm' => 1, 'headingLevel' => 'h4'];
-    $customFieldHandler->addCustomFieldsToForm($form, 'User', $params);
+    $params = ['student' => 1, 'applicationForm' => 1, 'subheading' => __('Other Information')];
+    $container->get(CustomFieldHandler::class)->addCustomFieldsToForm($form, 'Person', $params);
 
     // FAMILY
     if (!empty($gibbonFamilyID)) {
@@ -501,8 +499,8 @@ if ($proceed == false) {
                 $row->addSelectRelationship('parent1relationship')->required();
 
             // CUSTOM FIELDS FOR PARENT 1 WITH FAMILY
-            $params = ['parent' => 1, 'applicationForm' => 1, 'prefix' => 'parent1custom', 'headingPrefix' => __('Parent/Guardian').' 1', 'headingLevel' => 'h4'];
-            $customFieldHandler->addCustomFieldsToForm($form, 'User', $params, $parent1fields);
+            $params = ['parent' => 1, 'applicationForm' => 1, 'prefix' => 'parent1custom', 'subheading' => __('Parent/Guardian').' 1 '.__('Other Information')];
+            $container->get(CustomFieldHandler::class)->addCustomFieldsToForm($form, 'Person', $params, $parent1fields);
 
             $start = 2;
         } else {
@@ -628,8 +626,8 @@ if ($proceed == false) {
                 $row->addTextField("parent{$i}employer")->maxLength(90)->loadFrom($application);
 
             // CUSTOM FIELDS FOR PARENTS
-            $params = ['parent' => 1, 'applicationForm' => 1, 'prefix' => "parent{$i}custom", 'headingPrefix' => __('Parent/Guardian')." $i", 'headingLevel' => 'h4'];
-            $customFieldHandler->addCustomFieldsToForm($form, 'User', $params, $application["parent{$i}fields"] ?? '');
+            $params = ['parent' => 1, 'applicationForm' => 1, 'prefix' => "parent{$i}custom", 'subheading' => __('Parent/Guardian')." $i ".__('Other Information')];
+            $container->get(CustomFieldHandler::class)->addCustomFieldsToForm($form, 'Person', $params, $application["parent{$i}fields"] ?? '');
         }
     } else {
         // LOGGED IN PARENT WITH FAMILY
@@ -741,7 +739,7 @@ if ($proceed == false) {
         $heading = $form->addRow()->addHeading(__('Language Selection'));
 
         if (!empty($languageOptionsBlurb)) {
-            $heading->append($languageOptionsBlurb);
+            $heading->append($languageOptionsBlurb)->wrap('<p>','</p>');
         }
 
         if ($languageOptionsLanguageList != '') {
@@ -766,7 +764,7 @@ if ($proceed == false) {
 
         $scholarship = getSettingByScope($connection2, 'Application Form', 'scholarships');
         if (!empty($scholarship)) {
-            $heading->append($scholarship);
+            $heading->append($scholarship)->wrap('<p>','</p>');
         }
 
         $row = $form->addRow();
@@ -866,6 +864,7 @@ if ($proceed == false) {
             } else {
                 $heading->append(__('These documents are all required, but can be submitted separately to this form if preferred. Please note, however, that your application will be processed faster if the documents are included here.'));
             }
+            $heading->wrap('<p>', '</p>');
         }
 
         $fileUploader = new Gibbon\FileUploader($pdo, $gibbon->session);
@@ -928,7 +927,7 @@ if ($proceed == false) {
     // AGREEMENT
     $agreement = getSettingByScope($connection2, 'Application Form', 'agreement');
     if (!empty($agreement)) {
-        $form->addRow()->addHeading(__('Agreement'))->append($agreement);
+        $form->addRow()->addHeading(__('Agreement'))->append($agreement)->wrap('<p>','</p>');
 
         $row = $form->addRow();
             $row->addLabel('agreement', '<b>'.__('Do you agree to the above?').'</b>');

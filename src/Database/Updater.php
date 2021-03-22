@@ -106,7 +106,7 @@ class Updater implements ContainerAwareInterface
         $currentHash = $this->settingGateway->getSettingByScope('System Admin', 'composerLockHash');
         $autoloadFile = $this->absolutePath.'/vendor/autoload.php';
 
-        return (!empty($currentHash) && $currentHash != $this->getComposerHash()) || !is_file($autoloadFile);
+        return $currentHash != $this->getComposerHash() || !is_file($autoloadFile);
     }
 
     public function update() : array

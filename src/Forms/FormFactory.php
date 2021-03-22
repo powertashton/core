@@ -90,14 +90,9 @@ class FormFactory implements FormFactoryInterface
         return new Layout\Label($for, $label);
     }
 
-    public function createHeading($content = '', $tag = null)
+    public function createHeading($content = '')
     {
-        return new Layout\Heading($content, $tag);
-    }
-
-    public function createSubheading($content, $tag = 'h4')
-    {
-        return new Layout\Heading($content, $tag = 'h4');
+        return new Layout\Heading($content);
     }
 
     public function createContent($content = '')
@@ -253,6 +248,12 @@ class FormFactory implements FormFactoryInterface
         return new Input\Dropdown($name);
     }
     /* PRE-DEFINED LAYOUT --------------------------- */
+
+    public function createSubheading($content, $tag = 'h4')
+    {
+        $content = sprintf('<%1$s class="m-0 p-0">%2$s</%1$s>', $tag, $content);
+        return $this->createContent($content);
+    }
 
     public function createAlert($content, $level = 'warning')
     {
