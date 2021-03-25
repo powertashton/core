@@ -36,7 +36,6 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
     $page->return->setEditLink($editLink);
 
     $customFieldHandler = $container->get(CustomFieldHandler::class);
-    $context = $_GET['context'] ?? '';
 
     $form = Form::create('action', $_SESSION[$guid]['absoluteURL'].'/modules/'.$_SESSION[$guid]['module'].'/customFields_addProcess.php');
     $form->addHiddenValue('address', $_SESSION[$guid]['address']);
@@ -45,42 +44,15 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
 
     $row = $form->addRow();
         $row->addLabel('context', __('Context'));
-        $row->addSelect('context')->fromArray($customFieldHandler->getContexts())->required()->placeholder()->selected($context);
+        $row->addSelect('context')->fromArray($customFieldHandler->getContexts())->required()->placeholder();
 
     $row = $form->addRow();
         $row->addLabel('name', __('Name'))->description(__('Must be unique for this context.'));
         $row->addTextField('name')->maxLength(50)->required();
 
     $row = $form->addRow();
-        $row->addLabel('description', __('Description'))->description(__('Displayed as smaller text next to the field name.'));
+        $row->addLabel('description', __('Description'));
         $row->addTextField('description')->maxLength(255);
-
-    $headings = $customFieldHandler->getHeadings();
-    $contextHeadings = $contextCustom = [];
-    $contextChained = array_reduce(array_keys($headings), function($group, $context) use (&$headings, &$contextHeadings, &$contextCustom) {
-        foreach ($headings[$context] as $key => $value) {
-            $contextHeadings[$key.'_'.$context] = $value;
-            $group[$value.'_'.$context] = $context;
-        }
-        $contextHeadings['Custom_'.$context] = '['.__('Custom').']';
-        $contextCustom[] = 'Custom_'.$context;
-        $group['Custom_'.$context] = $context;
-        return $group;
-    }, []);
-    
-    $row = $form->addRow();
-        $row->addLabel('heading', __('Heading'))->description(__('Optionally list this field under a heading.'));
-        $row->addSelect('heading')
-            ->fromArray($contextHeadings)
-            ->chainedTo('context', $contextChained)
-            ->placeholder();
-
-    $form->toggleVisibilityByClass('headingCustom')->onSelect('heading')->when($contextCustom);
-    
-    $row = $form->addRow()->addClass('headingCustom');
-        $row->addLabel('headingCustom', __('Custom Heading'));
-        $row->addTextField('headingCustom')->maxLength(90);
-
 
     $row = $form->addRow();
         $row->addLabel('active', __('Active'));
@@ -95,19 +67,19 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
     $form->toggleVisibilityByClass('optionsLength')->onSelect('type')->when(['varchar', 'number']);
     $row = $form->addRow()->addClass('optionsLength');
         $row->addLabel('options', __('Max Length'))->description(__('Number of characters, up to 255.'));
-        $row->addNumber('options')->setID('optionsLength')->minimum(1)->maximum(255)->onlyInteger(true);
+        $row->addNumber('options')->minimum(1)->maximum(255)->onlyInteger(true);
 
     $form->toggleVisibilityByClass('optionsRows')->onSelect('type')->when(['text', 'editor']);
     $row = $form->addRow()->addClass('optionsRows');
         $row->addLabel('options', __('Rows'))->description(__('Number of rows for field.'));
-        $row->addNumber('options')->setID('optionsRows')->minimum(1)->maximum(20)->onlyInteger(true);
+        $row->addNumber('options')->minimum(1)->maximum(20)->onlyInteger(true);
 
     $form->toggleVisibilityByClass('optionsOptions')->onSelect('type')->when(['select', 'checkboxes', 'radio']);
     $row = $form->addRow()->addClass('optionsOptions');
         $row->addLabel('options', __('Options'))
             ->description(__('Comma separated list of options.'))
             ->description(__('Dropdown: use [] to create option groups.'));
-        $row->addTextArea('options')->setID('optionsOptions')->required()->setRows(3);
+        $row->addTextArea('options')->setRows(3)->required();
 
     $form->toggleVisibilityByClass('optionsFile')->onSelect('type')->when(['file']);
     $row = $form->addRow()->addClass('optionsFile');
@@ -122,11 +94,14 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
         $row->addLabel('hidden', __('Hidden'))->description(__('Is this field hidden from profiles and user-facing pages?'));
         $row->addYesNo('hidden')->required()->selected('N');
 
+    $row = $form->addRow();
+        $row->addLabel('heading', __('Heading'))->description(__('Optionally list this field under a heading.'));
+        $row->addTextField('heading')->maxLength(90);
+
     $form->addRow()->addClass('contextPerson')->addHeading(__('Visibility'));
 
-    $form->toggleVisibilityByClass('contextPerson')->onSelect('context')->when('User');
-    $form->toggleVisibilityByClass('contextDataUpdate')->onSelect('context')->when(['User', 'Medical Form']);
-    $form->toggleVisibilityByClass('contextApplication')->onSelect('context')->when(['User', 'Staff']);
+    $form->toggleVisibilityByClass('contextPerson')->onSelect('context')->when('Person');
+    $form->toggleVisibilityByClass('contextDataUpdate')->onSelect('context')->when(['Person', 'Medical Form']);
 
     $activePersonOptions = [
         'activePersonStudent' => __('Student'),
@@ -142,7 +117,7 @@ if (isActionAccessible($guid, $connection2, '/modules/System Admin/customFields_
         $row->addLabel('activeDataUpdater', __('Include In Data Updater?'));
         $row->addSelect('activeDataUpdater')->fromArray(['1' => __('Yes'), '0' => __('No')])->selected('1')->required();
 
-    $row = $form->addRow()->addClass('contextApplication');
+    $row = $form->addRow()->addClass('contextPerson');
         $row->addLabel('activeApplicationForm', __('Include In Application Form?'));
         $row->addSelect('activeApplicationForm')->fromArray(['1' => __('Yes'), '0' => __('No')])->selected('0')->required();
     

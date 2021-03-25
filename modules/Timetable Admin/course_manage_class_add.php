@@ -18,7 +18,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 use Gibbon\Forms\Form;
-use Gibbon\Forms\CustomFieldHandler;
 
 if (isActionAccessible($guid, $connection2, '/modules/Timetable Admin/course_manage_class_add.php') == false) {
     // Access denied
@@ -61,8 +60,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Timetable Admin/course_man
 			$form->addHiddenValue('gibbonSchoolYearID', $gibbonSchoolYearID);
 			$form->addHiddenValue('gibbonCourseID', $gibbonCourseID);
 			
-            $row = $form->addRow()->addHeading(__('Basic Details'));
-
 			$row = $form->addRow();
 				$row->addLabel('schoolYearName', __('School Year'));
 				$row->addTextField('schoolYearName')->required()->readonly()->setValue($values['yearName']);
@@ -88,9 +85,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Timetable Admin/course_man
 				$row->addLabel('attendance', __('Track Attendance?'))->description(__('Should this class allow attendance to be taken?'));
 				$row->addYesNo('attendance');
 			}
-
-            // Custom Fields
-            $container->get(CustomFieldHandler::class)->addCustomFieldsToForm($form, 'Class', []);
 
 			$row = $form->addRow();
 				$row->addFooter();

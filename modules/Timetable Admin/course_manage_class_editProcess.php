@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use Gibbon\Forms\CustomFieldHandler;
-
 include '../../gibbon.php';
 
 $gibbonCourseClassID = $_POST['gibbonCourseClassID'];
@@ -60,15 +58,6 @@ if ($gibbonCourseID == '' or $gibbonSchoolYearID == '') { echo 'Fatal error load
                 $reportable = $_POST['reportable'];
                 $attendance = (isset($_POST['attendance']))? $_POST['attendance'] : 'N';
 
-                $customRequireFail = false;
-                $fields = $container->get(CustomFieldHandler::class)->getFieldDataFromPOST('Class', [], $customRequireFail);
-
-                if ($customRequireFail) {
-                    $URL .= '&return=error1';
-                    header("Location: {$URL}");
-                    exit;
-                }
-
                 if ($name == '' or $nameShort == '') {
                     $URL .= '&return=error3';
                     header("Location: {$URL}");
@@ -91,8 +80,8 @@ if ($gibbonCourseID == '' or $gibbonSchoolYearID == '') { echo 'Fatal error load
                     } else {
                         //Write to database
                         try {
-                            $data = array('name' => $name, 'nameShort' => $nameShort, 'reportable' => $reportable, 'attendance' => $attendance, 'fields' => $fields, 'gibbonCourseClassID' => $gibbonCourseClassID);
-                            $sql = 'UPDATE gibbonCourseClass SET name=:name, nameShort=:nameShort, reportable=:reportable, attendance=:attendance, fields=:fields WHERE gibbonCourseClassID=:gibbonCourseClassID';
+                            $data = array('name' => $name, 'nameShort' => $nameShort, 'reportable' => $reportable, 'attendance' => $attendance, 'gibbonCourseClassID' => $gibbonCourseClassID);
+                            $sql = 'UPDATE gibbonCourseClass SET name=:name, nameShort=:nameShort, reportable=:reportable, attendance=:attendance WHERE gibbonCourseClassID=:gibbonCourseClassID';
                             $result = $connection2->prepare($sql);
                             $result->execute($data);
                         } catch (PDOException $e) {

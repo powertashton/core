@@ -22,7 +22,6 @@ use Gibbon\Domain\DataSet;
 use Gibbon\Services\Format;
 use Gibbon\Tables\DataTable;
 use Gibbon\Tables\View\GridView;
-use Gibbon\Forms\CustomFieldHandler;
 use Gibbon\Tables\Prefab\ClassGroupTable;
 
 //Module includes
@@ -43,7 +42,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Departments/department_cou
     } else {
         if (!empty($gibbonDepartmentID)) {
             $data = array('gibbonCourseClassID' => $gibbonCourseClassID);
-            $sql = "SELECT gibbonCourse.gibbonSchoolYearID,gibbonDepartment.name AS department, gibbonCourse.name AS courseLong, gibbonCourse.nameShort AS course, gibbonCourseClass.name AS classLong, gibbonCourseClass.nameShort AS class, gibbonCourse.gibbonCourseID, gibbonSchoolYear.name AS year, gibbonCourseClass.attendance, gibbonCourseClass.fields
+            $sql = "SELECT gibbonCourse.gibbonSchoolYearID,gibbonDepartment.name AS department, gibbonCourse.name AS courseLong, gibbonCourse.nameShort AS course, gibbonCourseClass.name AS classLong, gibbonCourseClass.nameShort AS class, gibbonCourse.gibbonCourseID, gibbonSchoolYear.name AS year, gibbonCourseClass.attendance
                     FROM gibbonCourse
                     JOIN gibbonCourseClass ON (gibbonCourse.gibbonCourseID=gibbonCourseClass.gibbonCourseID)
                     JOIN gibbonSchoolYear ON (gibbonCourse.gibbonSchoolYearID=gibbonSchoolYear.gibbonSchoolYearID)
@@ -51,7 +50,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Departments/department_cou
                     WHERE gibbonCourseClassID=:gibbonCourseClassID";
         } else {
             $data = array('gibbonCourseClassID' => $gibbonCourseClassID);
-            $sql = "SELECT gibbonCourse.gibbonSchoolYearID, gibbonCourse.name AS courseLong, gibbonCourse.nameShort AS course, gibbonCourseClass.name AS classLong, gibbonCourseClass.nameShort AS class, gibbonCourse.gibbonCourseID, gibbonSchoolYear.name AS year, gibbonCourseClass.attendance, gibbonCourseClass.fields
+            $sql = "SELECT gibbonCourse.gibbonSchoolYearID, gibbonCourse.name AS courseLong, gibbonCourse.nameShort AS course, gibbonCourseClass.name AS classLong, gibbonCourseClass.nameShort AS class, gibbonCourse.gibbonCourseID, gibbonSchoolYear.name AS year, gibbonCourseClass.attendance
                     FROM gibbonCourse
                     JOIN gibbonCourseClass ON (gibbonCourse.gibbonCourseID=gibbonCourseClass.gibbonCourseID)
                     JOIN gibbonSchoolYear ON (gibbonCourse.gibbonSchoolYearID=gibbonSchoolYear.gibbonSchoolYearID)
@@ -155,11 +154,6 @@ if (isActionAccessible($guid, $connection2, '/modules/Departments/department_cou
                 });
 
             echo $table->render(new DataSet($menuItems));
-
-            // Custom fields
-            $table = DataTable::createDetails('fields');
-            $container->get(CustomFieldHandler::class)->addCustomFieldsToTable($table, 'Class', [], $row['fields']);
-            echo $table->render([$row]);
 
             // Participants
             if (!empty($menuItems)) {

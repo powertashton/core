@@ -795,13 +795,4 @@ ALTER TABLE `gibbonCustomField` ADD `hidden` ENUM('Y','N') NULL DEFAULT 'N' AFTE
 INSERT INTO `gibbonSetting` (`scope`, `name`, `nameDisplay`, `description`, `value`) VALUES ('System Admin', 'composerLockHash', 'Composer Update Required', '', '742368e59c40f1eb9b7d8f116f7af49d');end
 UPDATE `gibbonAction` SET categoryPermissionParent='N' WHERE `name`='View Markbook_myMarks' AND `gibbonModuleID`=(SELECT gibbonModuleID FROM gibbonModule WHERE name='Markbook');end
 DELETE `gibbonPermission` FROM `gibbonPermission` JOIN `gibbonAction` ON (gibbonAction.gibbonActionID=gibbonPermission.gibbonActionID) JOIN gibbonRole ON (gibbonRole.gibbonRoleID=gibbonPermission.gibbonRoleID) WHERE gibbonAction.name='View Markbook_myMarks' AND gibbonRole.category='Parent';end
-SELECT NULL;end
-UPDATE `gibbonCustomField` SET `heading`='General Information' WHERE `context`='Medical Form' AND (`name`='Blood Type' OR `name`='Tetanus Within Last 10 Years?');end
-UPDATE `gibbonCustomField` SET `context`='User' WHERE `context`='Person';end
-UPDATE `gibbonPlannerEntry` SET `gibbonUnitID`=NULL WHERE `gibbonUnitID`='0000000000';end
-ALTER TABLE `gibbonFirstAid` ADD `fields` TEXT NULL AFTER `timestamp`;end
-ALTER TABLE `gibbonStaff` ADD `fields` TEXT NULL AFTER `biographicalGroupingPriority`;end
-ALTER TABLE `gibbonCourse` ADD `fields` TEXT NULL AFTER `orderBy`;end
-ALTER TABLE `gibbonCourseClass` ADD `fields` TEXT NULL AFTER `gibbonScaleIDTarget`;end
-ALTER TABLE `gibbonStaffApplicationForm` ADD `staffFields` TEXT NULL AFTER `fields`;end
 ";
