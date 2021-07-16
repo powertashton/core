@@ -1005,4 +1005,5 @@ ALTER TABLE `gibbonGroup` CHANGE `name` `name` VARCHAR(60) CHARACTER SET utf8 CO
 $sql[$count][0] = '23.0.00';
 $sql[$count][1] = "
 ALTER TABLE `gibbonLibraryItem` ADD `cost` decimal(10,2) DEFAULT NULL AFTER `invoiceNumber`;end
+INSERT INTO `gibbonAction` (`gibbonModuleID`, `name`, `precedence`, `category`, `description`, `URLList`, `entryURL`, `defaultPermissionAdmin`, `defaultPermissionTeacher`, `defaultPermissionStudent`, `defaultPermissionParent`, `defaultPermissionSupport`, `categoryPermissionStaff`, `categoryPermissionStudent`, `categoryPermissionParent`, `categoryPermissionOther`) VALUES ((SELECT gibbonModuleID FROM gibbonModule WHERE name='Library'), 'Stocktaking Setup', 0, 'Stocktaking', 'Allows users to enable and configure stocktaking settings.', 'stocktaking_setup.php', 'stocktaking_setup.php', 'Y', 'N', 'N', 'N', 'N', 'Y', 'N', 'N', 'N');end
 ";
